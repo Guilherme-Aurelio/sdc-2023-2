@@ -1,174 +1,112 @@
 defmodule Poligono do
-  @pontos []
+  @menu "
 
-  def principal() do
-    loop()
-  end
+  Menu do sistema
 
-  def criar() do
-   IO.puts("Digite as coordenadas do ponto (x,y):")
-  input = String.trim(IO.gets(""))
+  =============
 
-  case String.split(input, ~r{,}) do
-    [x, y] ->
-      ponto = {x, y}
-      [ponto]
-    _ ->
-      IO.puts("Formato de coordenadas inválido. Use o formato x,y.")
-  end
-    loop()
-  end
+  1. Criar
+  2. Listar
+  3. Atualizar
+  4. Excluir
+  5. Sair
 
-  def listar() do
-    IO.puts("Pontos do polígono:")
-    Enum.each(@pontos, fn ponto -> IO.puts("#{elem(ponto, 0)}, #{elem(ponto, 1)}") end)
-    loop()
-  end
+  Entre com sua opção: "
 
-  def atualizar() do
-    IO.puts("Digite o índice do ponto a ser atualizado:")
-    index = String.to_integer(IO.gets(""))
-    IO.puts("Digite as novas coordenadas do ponto (x,y):")
-    coords = String.split(IO.gets(""), ~r{,})
-    ponto = {String.trim(Enum.at(coords, 0)), String.trim(Enum.at(coords, 1))}
-    {:ok, _} = atualizar_ponto(index, ponto)
-    IO.puts("Ponto atualizado com sucesso!")
-    loop()
-  end
 
-  def excluir() do
-    IO.puts("Digite o índice do ponto a ser excluído:")
-    index = String.to_integer(IO.gets(""))
-    {:ok, _} = excluir_ponto(index)
-    IO.puts("Ponto excluído com sucesso!")
-    loop()
-  end
+  def criar(lista) do
+    input = IO.gets("")
 
-  def sair() do
-    IO.puts("Saindo do sistema...")
-    :ok
-  end
-
-  defp adicionar_ponto(ponto) do
-    @pontos ++ [ponto]
-  end
-
-  defp atualizar_ponto(index, ponto) do
-    pontos_atualizados = Enum.with_index(@pontos, fn {p, i} -> if i == index, do: ponto, else: p end)
-    {:ok, @pontos = pontos_atualizados}
-  end
-
-  defp excluir_ponto(index) do
-    pontos_atualizados = Enum.delete_at(@pontos, index)
-    {:ok, @pontos = pontos_atualizados}
-  end
-
-  def translatar() do
-    listar()
-    if Enum.empty?(@pontos) do
-      IO.puts("Não há pontos para realizar a translação.")
-    else
-      IO.puts("Digite o valor de deslocamento em X: ")
-      deslocamento_x = String.to_float(IO.gets!(""))
-
-      IO.puts("Digite o valor de deslocamento em Y: ")
-      deslocamento_y = String.to_float(IO.gets!(""))
-
-      @pontos = Enum.map(@pontos, fn {x, y} -> {x + deslocamento_x, y + deslocamento_y} end)
-      IO.puts("Translação realizada com sucesso.")
+    case String.trim(input) do
+      "" -> lista
+      coords ->
+        [x, y | _rest] = String.split(coords) |> Enum.map(&String.to_integer/1)
+        nova_lista = lista ++ [{x, y}]
+        IO.puts("Coordenada criada com sucesso.")
+        nova_lista
     end
   end
 
-  def zoom() do
-    listar()
-    if Enum.empty?(@pontos) do
-      IO.puts("Não há pontos para realizar o zoom.")
-    else
-      IO.puts("Digite o valor de escala em X: ")
-      escala_x = String.to_float(IO.gets!(""))
+  def listar(lista) do
+    IO.puts("Listar")
+    Enum.each(lista, fn {x, y} -> IO.puts("(#{x}, #{y})") end)
+    lista
+  end
 
-      IO.puts("Digite o valor de escala em Y: ")
-      escala_y = String.to_float(IO.gets!(""))
+  def alterar(lista) do
+    IO.puts("Alterar")
+    IO.puts("Digite o par que você deseja alterar (formato: x y):")
+    [x, y] = IO.gets("") |> String.trim() |> String.split() |> Enum.map(&String.to_integer/1)
 
-      @pontos = Enum.map(@pontos, fn {x, y} -> {x * escala_x, y * escala_y} end)
-      IO.puts("Zoom realizado com sucesso.")
+    case Enum.find_index(lista, &(&1 == {x, y})) do
+      nil ->
+        IO.puts("Par de coordenadas não encontrado.")
+        lista
+      indice ->
+        IO.puts("Digite o novo par de coordenadas (formato: x y):")
+        [a, b] = IO.gets("") |> String.trim() |> String.split() |> Enum.map(&String.to_integer/1)
+
+        # Criar uma nova lista com a coordenada atualizada
+        nova_lista = List.replace_at(lista, indice, {a, b})
+        IO.puts("Coordenada alterada com sucesso.")
+        nova_lista
     end
   end
 
-  def rotacionar() do
-    listar()
-    if Enum.empty?(@pontos) do
-      IO.puts("Não há pontos para realizar a rotação.")
-    else
-      IO.puts("Digite o ângulo de rotação (em graus): ")
-      angulo = String.to_float(IO.gets!(""))
+  def excluir(lista) do
+    IO.puts("Excluir")
+    IO.puts("Digite o par que você deseja excluir (formato: x y):")
+    [x, y] = IO.gets("") |> String.trim() |> String.split() |> Enum.map(&String.to_integer/1)
 
-      radianos = :math.pi * angulo / 180.0
-
-      @pontos = Enum.map(@pontos, fn {x, y} ->
-        novo_x = x * :math.cos(radianos) - y * :math.sin(radianos)
-        novo_y = x * :math.sin(radianos) + y * :math.cos(radianos)
-        {novo_x, novo_y}
-      end)
-
-      IO.puts("Rotação realizada com sucesso.")
+    case Enum.find_index(lista, &(&1 == {x, y})) do
+      nil ->
+        IO.puts("Par de coordenadas não encontrado.")
+        lista
+      indice ->
+        # Criar uma nova lista excluindo o par de coordenadas
+        nova_lista = Enum.reject(lista, fn {a, b} -> a == x and b == y end)
+        IO.puts("Coordenada excluída com sucesso.")
+        nova_lista
     end
   end
 
-  def refletir() do
-    listar()
-    if Enum.empty?(@pontos) do
-      IO.puts("Não há pontos para realizar a reflexão.")
-    else
-      IO.puts("Escolha o eixo de reflexão:")
-      IO.puts("1. Eixo X")
-      IO.puts("2. Eixo Y")
-      opcao = String.to_integer(IO.gets!(""))
-
-      case opcao do
-        1 ->
-          @pontos = Enum.map(@pontos, fn {x, y} -> {x, -y} end)
-          IO.puts("Reflexão em relação ao eixo X realizada com sucesso.")
-        2 ->
-          @pontos = Enum.map(@pontos, fn {x, y} -> {-x, y} end)
-          IO.puts("Reflexão em relação ao eixo Y realizada com sucesso.")
-        _ ->
-          IO.puts("Opção inválida.")
-      end
-    end
+  def principal(lista) do
+    loop(lista)
   end
 
-  def loop() do
-    IO.puts("\nSistema Final")
-    IO.puts("=============\n")
-    IO.puts("1. Criar")
-    IO.puts("2. Listar")
-    IO.puts("3. Atualizar")
-    IO.puts("4. Excluir")
-    IO.puts("5. Translatar")
-    IO.puts("6. Zoom")
-    IO.puts("7. Rotacionar")
-    IO.puts("8. Refletir")
-    IO.puts("9. Sair")
+  defp loop(lista) do
+    IO.puts("""
+      Menu do sistema
+      =============
+      1. Criar
+      2. Listar
+      3. Atualizar
+      4. Excluir
+      5. Sair
+      Entre com sua opção:
+    """)
 
-    IO.puts("\nEntre com sua opção: ")
-    opcao = String.to_integer(IO.gets("") |> String.trim)
-    case opcao do
-      1 -> criar()
-      2 -> listar()
-      3 -> atualizar()
-      4 -> excluir()
-      5 -> translatar()
-      6 -> zoom()
-      7 -> rotacionar()
-      8 -> refletir()
-      9 -> sair()
+    case IO.gets("") |> String.trim() |> String.to_integer() do
+      1 ->
+        IO.puts("Digite as coordenadas do ponto (x, y), separadas por espaço. Aperte ENTER duas vezes.")
+        loop(criar(lista))
+
+      2 ->
+        listar(lista)
+        loop(lista)
+
+      3 ->
+        loop(alterar(lista))
+
+      4 ->
+        loop(excluir(lista))
+
+      5 ->
+        IO.puts("Até logo")
+
       _ ->
-        IO.puts("Opção inválida. Tente novamente.")
-        loop()
+        IO.puts("Opção inválida")
+        loop(lista)
     end
-
-    loop()
   end
-
 end
