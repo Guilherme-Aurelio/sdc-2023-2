@@ -15,15 +15,19 @@ defmodule Poligono do
 
 
   def criar(lista) do
-    input = IO.gets("")
+    criar_pares(lista)
+  end
+
+  defp criar_pares(lista) do
+    input = IO.gets("Digite as coordenadas do ponto (x, y), separadas por espaço. Coloque um PAR de cada vez. Para sair aperte ENTER.\n")
 
     case String.trim(input) do
       "" -> lista
       coords ->
-        [x, y | _rest] = String.split(coords) |> Enum.map(&String.to_integer/1)
+        [x, y | rest] = String.split(coords) |> Enum.map(&String.to_integer/1)
         nova_lista = lista ++ [{x, y}]
-        IO.puts("Coordenada criada com sucesso.")
-        nova_lista
+        IO.puts("Coordenada (#{x}, #{y}) criada com sucesso.")
+        criar_pares(nova_lista)
     end
   end
 
@@ -88,7 +92,7 @@ defmodule Poligono do
 
     case IO.gets("") |> String.trim() |> String.to_integer() do
       1 ->
-        IO.puts("Digite as coordenadas do ponto (x, y), separadas por espaço. Aperte ENTER duas vezes.")
+        #IO.puts("Digite as coordenadas do ponto (x, y), separadas por espaço. Coloque um PAR de cada vez.")
         loop(criar(lista))
 
       2 ->
