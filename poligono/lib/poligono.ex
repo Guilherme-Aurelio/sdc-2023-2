@@ -74,6 +74,64 @@ defmodule Poligono do
     end
   end
 
+  def translacao(lista) do
+    IO.puts("Translação")
+    IO.puts("Digite os valores de translação para x e y (formato: x y):")
+    [tx, ty] = IO.gets("") |> String.trim() |> String.split() |> Enum.map(&String.to_integer/1)
+
+    nova_lista = Enum.map(lista, fn {x, y} -> {x + tx, y + ty} end)
+    IO.puts("Translação aplicada com sucesso.")
+    nova_lista
+  end
+
+  def escala(lista) do
+    IO.puts("Escala")
+    IO.puts("Digite o fator de escala para x e y (formato: x y):")
+
+    input = IO.gets("") |> String.trim()
+
+    [sx_str | sy_str] = String.split(input, " ", trim: true)
+    sx = String.to_integer(sx_str)
+    sy = String.to_integer(Enum.join(sy_str, " "))
+
+    nova_lista = Enum.map(lista, fn {x, y} -> {x * sx, y * sy} end)
+    IO.puts("Escala aplicada com sucesso.")
+    nova_lista
+  end
+
+
+
+  def rotacao(lista) do
+    IO.puts("Rotação")
+    IO.puts("Digite o ângulo de rotação em graus:")
+    angulo = IO.gets("") |> String.trim() |> String.to_integer()
+    radianos = angulo * :math.pi() / 180.0
+
+    nova_lista = Enum.map(lista, fn {x, y} ->
+      novo_x = x * :math.cos(radianos) - y * :math.sin(radianos)
+      novo_y = x * :math.sin(radianos) + y * :math.cos(radianos)
+      {novo_x, novo_y}
+    end)
+    IO.puts("Rotação aplicada com sucesso.")
+    nova_lista
+  end
+
+  def reflexao(lista) do
+    IO.puts("Reflexão")
+    IO.puts("Escolha o eixo de reflexão (x ou y):")
+    eixo = IO.gets("") |> String.trim()
+
+    nova_lista =
+      case eixo do
+        "x" -> Enum.map(lista, fn {x, y} -> {x, -y} end)
+        "y" -> Enum.map(lista, fn {x, y} -> {-x, y} end)
+        _ -> lista
+      end
+
+    IO.puts("Reflexão aplicada com sucesso.")
+    nova_lista
+  end
+
   def principal(lista) do
     loop(lista)
   end
@@ -86,7 +144,11 @@ defmodule Poligono do
       2. Listar
       3. Atualizar
       4. Excluir
-      5. Sair
+      5. Translação
+      6. Escala
+      7. Rotação
+      8. Reflexão
+      9. Sair
       Entre com sua opção:
     """)
 
@@ -106,6 +168,18 @@ defmodule Poligono do
         loop(excluir(lista))
 
       5 ->
+        loop(translacao(lista))
+
+      6 ->
+        loop(escala(lista))
+
+      7 ->
+        loop(rotacao(lista))
+
+      8 ->
+        loop(reflexao(lista))
+
+      9 ->
         IO.puts("Até logo")
 
       _ ->
