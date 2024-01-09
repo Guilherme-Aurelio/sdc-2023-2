@@ -49,8 +49,6 @@ defmodule Poligono do
       indice ->
         IO.puts("Digite o novo par de coordenadas (formato: x y):")
         [a, b] = IO.gets("") |> String.trim() |> String.split() |> Enum.map(&String.to_integer/1)
-
-        # Criar uma nova lista com a coordenada atualizada
         nova_lista = List.replace_at(lista, indice, {a, b})
         IO.puts("Coordenada alterada com sucesso.")
         nova_lista
@@ -67,7 +65,6 @@ defmodule Poligono do
         IO.puts("Par de coordenadas não encontrado.")
         lista
       indice ->
-        # Criar uma nova lista excluindo o par de coordenadas
         nova_lista = Enum.reject(lista, fn {a, b} -> a == x and b == y end)
         IO.puts("Coordenada excluída com sucesso.")
         nova_lista
@@ -186,5 +183,25 @@ defmodule Poligono do
         IO.puts("Opção inválida")
         loop(lista)
     end
+  end
+
+  def escala(lista) do
+    IO.puts("Escala")
+    IO.puts("Digite o fator de escala para x e y (formato: x y):")
+
+    input = IO.gets("") |> String.trim()
+
+    [sx_str | sy_str] = String.split(input, " ", trim: true)
+    sx = String.to_integer(sx_str)
+    sy = String.to_integer(Enum.join(sy_str, " "))
+
+    tarefas = Enum.map(copiar_lista(lista), fn [x, y] ->
+      Task.async(fn -> [x * sx, y * sy] end)
+    end)
+
+    nova_lista = Enum.map(tarefas, &Task.await/1)
+    IO.puts("Escala aplicada com sucesso.")
+    IO.inspect(nova_lista)
+    nova_lista
   end
 end
